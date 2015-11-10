@@ -1,0 +1,110 @@
+heat_template_version: 2015-04-30
+
+description: >
+  Heat Orchestration Template (HOT) for the DEVOPSCONF Workshop.
+  The idea of the template is to orchestrate the creation of two virtual machines, asociate a custom security group to them
+  and connect both VMs to an existing network/subnet and assign a Floating IP to access them from the outside.	  
+
+parameters:
+  key_name:
+    type: string
+    description: Name of SSH keypair to assign to servers
+    constraints:
+      - custom_constraint: nova.keypair
+  image:
+    type: string
+    description: Name of image to use for servers
+    constraints:
+      - custom_constraint: glance.image
+  flavor:
+    type: string
+    description: Flavor to use for servers
+    default: m1.tiny
+    constraints:
+      - custom_constraint: nova.flavor
+  private_net_id:
+    type: string
+    description: ID of private network into which servers get deployed
+    constraints:
+      - custom_constraint: neutron.network
+  private_subnet_id:
+    type: string
+    description: ID of private sub network into which servers get deployed
+    constraints:
+      - custom_constraint: neutron.subnet
+  public_net:
+    type: string
+    default: nubeliu_miami_external_net
+    description: >
+      ID or name of public network for which floating IP addresses will be allocated
+
+resources:
+  server_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: Add security group rules for server
+      name: workshop-security-group
+      rules:
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 22		
+          port_range_max: 22
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: icmp
+
+  server1:
+    type: OS::Nova::Server
+    properties:
+      name: Server1
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: server1_port }
+
+  server1_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: private_net_id }
+      fixed_ips:
+        - subnet_id: { get_param: private_subnet_id }
+      security_groups: [{ get_resource: server_security_group }]
+
+  server1_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_net }
+      port_id: { get_resource: server1_port }
+
+  server2:
+    type: OS::Nova::Server
+    properties:
+      name: Server2
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: server2_port }
+
+  server2_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: private_net_id }
+      fixed_ips:
+        - subnet_id: { get_param: private_subnet_id }
+      security_groups: [{ get_resource: server_security_group }]
+
+  server2_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_net }
+      port_id: { get_resource: server2_port }
+
+
+outputs:
+  server1_private_ip:
+    description: IP address of server1 in private network
+    value: { get_attr: [ server1, first_address ] }
+  server2_private_ip:
+    description: IP address of server2 in private network
+    value: { get_attr: [ server2, first_address ] }
