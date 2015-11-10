@@ -20,11 +20,13 @@ parameters:
   key_name:
     type: string
     description: Name of SSH keypair to assign to servers
+    default: workshopKP
     constraints:
       - custom_constraint: nova.keypair
   image:
     type: string
     description: Name of image to use for servers
+    default: rhel-7.1
     constraints:
       - custom_constraint: glance.image
   flavor:
@@ -36,11 +38,13 @@ parameters:
   private_net_id:
     type: string
     description: ID of private network into which servers get deployed
+    default: a233ff68-447a-429e-8f5b-7cfab9d1c172
     constraints:
       - custom_constraint: neutron.network
   private_subnet_id:
     type: string
     description: ID of private sub network into which servers get deployed
+    default: c6b0e542-e246-4e7e-9abd-9e629e812ca3
     constraints:
       - custom_constraint: neutron.subnet
   public_net:
