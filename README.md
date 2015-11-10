@@ -5,7 +5,7 @@ Parameters to pass:
 
 * IMAGE
 ```
-ubuntu-14.04-server-ceph
+rhel-7.1
 ```
 * NET
 ```
