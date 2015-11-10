@@ -5,6 +5,17 @@ description: >
   The idea of the template is to orchestrate the creation of two virtual machines, asociate a custom security group to them
   and connect both VMs to an existing network/subnet and assign a Floating IP to access them from the outside.	  
 
+parameter_groups:
+- label: Parameters order
+  description: The parameters should be asked in this order to make more sense
+  parameters:
+  - image
+  - flavor
+  - private_net_id
+  - private_subnet_id
+  - public_net
+  - key_name
+
 parameters:
   key_name:
     type: string
