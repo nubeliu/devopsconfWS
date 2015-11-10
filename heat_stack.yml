@@ -103,8 +103,8 @@ resources:
 
 outputs:
   server1_private_ip:
-    description: IP address of server1 in private network
-    value: { get_attr: [ server1, first_address ] }
+    description: IP address of server1 to access from the outside
+    value: { get_attr: [ server1_floating_ip, floating_ip_address ] }
   server2_private_ip:
-    description: IP address of server2 in private network
-    value: { get_attr: [ server2, first_address ] }
+    description: IP address of server2 to access from the outside
+    value: { get_attr: [ server2_floating_ip, floating_ip_address ] }
